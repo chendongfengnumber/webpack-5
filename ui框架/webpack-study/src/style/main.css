@@ -1,0 +1,7 @@
+#app {
+  text-align: center;
+  color: green;
+  background: url('../assets/401.gif') no-repeat;
+  height: 500px;
+  width: 500px;
+}
