@@ -6,6 +6,8 @@ const htmlWebpackPlugin = require('html-webpack-plugin')
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 // 清除dist缓存文件
 const { CleanWebpackPlugin } = require('clean-webpack-plugin')
+// 处理vue问价
+const { VueLoaderPlugin } = require('vue-loader')
 
 const utils = require('./utils')
 const externalConfig = JSON.parse(JSON.stringify(utils.externalConfig));  // 读取配置
@@ -13,6 +15,14 @@ utils.getExternalModules(externalConfig); // 获取到合适的路径（引用�
 
 module.exports = {
   entry: path.join(__dirname, '../src/main.js'),
+  resolve: {
+    // 使用别名,可以使用少些..
+    alias: {
+      '@': path.join(__dirname, '../src/')
+    },
+    // 保证引入文件不带后缀
+    extensions: ['.vue', '.js']
+  },
   module: {
     rules: [
       {
@@ -22,17 +32,23 @@ module.exports = {
         ],
         include: [ path.join(__dirname, '../src/style') ]
       },
-      // 支持jsx语法糖
       {
         test: /\.js$/,
         use: ['babel-loader?cacheDirectory'],
-        include: path.resolve(__dirname, '../src'),
+        // include: path.join(__dirname, '../src'),
+        exclude: path.join(__dirname, '../node_modules')
+      },
+      {
+        test: /\.vue$/,
+        use: ['vue-loader'],
+        exclude: path.join(__dirname, '../node_modules')
       }
     ]
   },
   output: {
     filename: '[name]_[chunkhash:8].js',
-    path: path.join(__dirname, '../dist')
+    path: path.join(__dirname, '../dist'),
+    chunkFilename: 'chunks/[name].chunks.js'
   },
   plugins: [
     new htmlWebpackPlugin({
@@ -44,6 +60,7 @@ module.exports = {
     new MiniCssExtractPlugin({
       filename: '[name]_[contenthash:8].css',
       chunkFilename: "[id].css"
-    })
+    }),
+    new VueLoaderPlugin()
   ]
 }
