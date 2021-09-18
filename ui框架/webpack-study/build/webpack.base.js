@@ -23,6 +23,36 @@ module.exports = {
     // 保证引入文件不带后缀
     extensions: ['.vue', '.js']
   },
+  optimization: {
+    splitChunks: {
+      chunks: 'all',
+      // 缓存组
+      cacheGroups: {
+        // 第三方依赖
+        verdors: {
+          name: 'chunks/verdor',
+          test: /node_modules/,
+          minSize: 0,
+          // maxSize: 300,
+          priority: 1,
+          minChunks: 1
+        },
+        // 公共模块
+        common: {
+          name: '/common',
+          minSize: 0,
+          priority: 2,
+          minChunks: 2, // 复用次数2次以上
+          reuseExistingChunk: true
+        }
+      }
+    }
+  },
+  // optimization: {
+  //   splitChunks: {
+  //     chunks: 'all',
+  //   },
+  // },
   module: {
     rules: [
       {
@@ -32,12 +62,12 @@ module.exports = {
         ],
         include: [ path.join(__dirname, '../src/style') ]
       },
-      {
-        test: /\.js$/,
-        use: ['babel-loader?cacheDirectory'],
-        // include: path.join(__dirname, '../src'),
-        exclude: path.join(__dirname, '../node_modules')
-      },
+      // {
+      //   test: /\.js$/,
+      //   use: ['babel-loader?cacheDirectory'],
+      //   // include: path.join(__dirname, '../src'),
+      //   exclude: path.join(__dirname, '../node_modules')
+      // },
       {
         test: /\.vue$/,
         use: ['vue-loader'],
@@ -46,9 +76,9 @@ module.exports = {
     ]
   },
   output: {
-    filename: '[name]_[chunkhash:8].js',
+    filename: '[name]_[contenthash].js',
     path: path.join(__dirname, '../dist'),
-    chunkFilename: 'chunks/[name].chunks.js'
+    chunkFilename: 'chunks/[name][contenthash].chunks.js'
   },
   plugins: [
     new htmlWebpackPlugin({
@@ -58,7 +88,7 @@ module.exports = {
     }),
     new CleanWebpackPlugin(),
     new MiniCssExtractPlugin({
-      filename: '[name]_[contenthash:8].css',
+      filename: '[name]_[contenthash].css',
       chunkFilename: "[id].css"
     }),
     new VueLoaderPlugin()
